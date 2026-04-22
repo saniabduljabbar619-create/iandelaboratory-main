@@ -1,0 +1,194 @@
+/* ==================================
+   ENTERPRISE RESULT VIEW (ROBUST RESPONSIVE 2026)
+   Optimized for Mobile, Tablet, and Desktop
+================================== */
+
+:root {
+    --sx-slate-50: #f8fafc;
+    --sx-slate-100: #f1f5f9;
+    --sx-slate-200: #e2e8f0;
+    --sx-slate-600: #475569;
+    --sx-slate-900: #0f172a;
+    --sx-primary: #2563eb;
+    --sx-success: #059669;
+    --sx-danger: #dc2626;
+    --sx-warning: #d97706;
+}
+
+.slx-result-view {
+    padding: 40px 15px; /* Reduced padding for mobile safety */
+    background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px);
+    background-size: 20px 20px;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* ==================================
+   CLINICAL HEADER
+================================== */
+.slx-result-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.slx-result-header h2 {
+    font-size: 24px; /* Scaled down for mobile */
+    font-weight: 900;
+    color: var(--sx-slate-900);
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+/* ==================================
+   RESULT CARD (THE DOCUMENT)
+================================== */
+.slx-result-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid var(--sx-slate-200);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px; /* Responsive padding */
+    position: relative;
+    overflow: hidden;
+}
+
+/* ==================================
+   PATIENT META GRID (MOBILE STACKING)
+================================== */
+.patient-meta-grid {
+    display: grid;
+    /* Forces 2 columns on tablet, 1 on mobile */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px dashed var(--sx-slate-100);
+}
+
+.meta-item label {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--sx-slate-600);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.meta-item span {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--sx-slate-900);
+    word-break: break-word; /* Prevents long names from breaking layout */
+}
+
+/* ==================================
+   RESPONSIVE TABLE WRAPPER (THE FIX)
+================================== */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto; /* Enables horizontal swipe on mobile */
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+.slx-result-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 500px; /* Ensures table doesn't "squish" too much */
+}
+
+.slx-result-table thead th {
+    background: var(--sx-slate-50);
+    color: var(--sx-slate-600);
+    font-weight: 800;
+    font-size: 11px;
+    text-transform: uppercase;
+    padding: 12px;
+    border-bottom: 2px solid var(--sx-slate-200);
+    white-space: nowrap;
+}
+
+.slx-result-table tbody td {
+    padding: 14px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--sx-slate-100);
+    white-space: nowrap; /* Keeps data aligned */
+}
+
+.col-parameter { 
+    font-weight: 700; 
+    color: var(--sx-slate-900);
+    white-space: normal !important; /* Allow test names to wrap */
+    min-width: 150px;
+}
+
+.col-result { font-weight: 800; font-size: 15px; color: var(--sx-primary); }
+
+/* ==================================
+   FLAGS & FOOTER
+================================== */
+.flag-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+.flag-high { background: #fee2e2; color: var(--sx-danger); }
+.flag-low { background: #eff6ff; color: var(--sx-primary); }
+.flag-normal { background: #ecfdf5; color: var(--sx-success); }
+
+.result-footer {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap; /* Stacks signature on mobile */
+    justify-content: space-between;
+    gap: 15px;
+    font-size: 12px;
+}
+
+/* ==================================
+   ACTION BAR (SMART RESPONSIVE)
+================================== */
+.slx-result-actions {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-direction: row; /* Default side-by-side */
+}
+
+.btn-download, .btn-secondary {
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 13px;
+    text-align: center;
+}
+
+.btn-download { background: var(--sx-slate-900); color: white; }
+.btn-secondary { background: white; color: var(--sx-slate-600); border: 1px solid var(--sx-slate-200); }
+
+/* ==================================
+   MOBILE OVERRIDES (BREAKPOINT)
+================================== */
+@media (max-width: 600px) {
+    .slx-result-header h2 { font-size: 20px; }
+    .slx-result-card { padding: 20px 15px; border-radius: 0; border-left: none; border-right: none; }
+    
+    .slx-result-actions {
+        flex-direction: column; /* Stack buttons on mobile */
+        width: 100%;
+    }
+    .btn-download, .btn-secondary { width: 100%; box-sizing: border-box; }
+    
+    .result-footer { text-align: center; flex-direction: column; }
+    .result-footer div { width: 100%; }
+}
