@@ -2,6 +2,16 @@ from sqlalchemy.orm import Session
 from app.models.notification_model import Notification
 import requests
 import os
+import logging
+import sys
+
+# Configure logging to output to stdout so Render captures it immediately
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger(__name__)
 
 class NotificationService:
 
@@ -52,21 +62,24 @@ class NotificationService:
         return notification
 
     # ==========================================================
-    # SENDCHAMP SMS DELIVERY LAYER
+    # SENDCHAMP SMS DELIVERY LAYER (Bulletproof Version)
     # ==========================================================
     @staticmethod
     def send_sms(phone: str, message: str) -> None:
         """
-        SMS delivery via Sendchamp. 
-        Uses the 'dnd' route for highest delivery success in Nigeria.
+        SMS delivery via Sendchamp with heavy logging for Render.
         """
+        logger.info(f"[SMS ATTEMPT] Preparing to send to: {phone}")
+
         api_key = os.getenv("SENDCHAMP_API_KEY")
         if not api_key:
-            print("[SMS] Skipped: SENDCHAMP_API_KEY not set")
+            logger.error("[SMS ABORTED] SENDCHAMP_API_KEY is missing from Environment Variables.")
             return
 
-        # Sendchamp prefers numbers without the '+' sign (e.g., 23480...)
+        # Normalization
+        original_phone = phone
         phone = NotificationService._normalize_phone(phone).replace("+", "")
+        logger.info(f"[SMS DATA] Normalized {original_phone} -> {phone}")
 
         url = "https://api.sendchamp.com/api/v1/sms/send"
         
@@ -76,45 +89,55 @@ class NotificationService:
             "Authorization": f"Bearer {api_key}"
         }
 
-        # Sendchamp uses 'dnd', 'non_dnd', or 'international' routes.
-        # 'dnd' is usually best for transactional alerts like yours.
         payload = {
             "to": [phone],
             "message": message,
-            "sender_name": "SAlert", # Or your registered Sender ID (e.g., IEDLABS)
+            "sender_name": "Sendchamp", 
             "route": "dnd"
         }
 
         try:
+            logger.info(f"[SMS REQUEST] Sending POST to Sendchamp for {phone}...")
             resp = requests.post(url, json=payload, headers=headers, timeout=15)
+            
+            # Check if we even got a response
+            logger.info(f"[SMS RESPONSE] Status Code: {resp.status_code}")
+            
             resp_data = resp.json() if resp.content else {}
-
-            # Sendchamp success check
+            
             if resp.status_code in [200, 201] and resp_data.get("status") == "success":
-                print(f"[SENDCHAMP SUCCESS] -> {phone}")
-                return
+                logger.info(f"[SMS SUCCESS] Sendchamp accepted the message for {phone}. ID: {resp_data.get('data', {}).get('id', 'N/A')}")
             else:
-                print(f"[SENDCHAMP FAIL] {resp.status_code} - {resp.text}")
+                logger.warning(f"[SMS FAIL] Sendchamp rejected request. Response: {resp.text}")
 
+        except requests.exceptions.Timeout:
+            logger.error(f"[SMS ERROR] Connection to Sendchamp timed out for {phone}.")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"[SMS ERROR] Network issue or invalid URL: {e}")
         except Exception as e:
-            print(f"[SENDCHAMP ERROR] {e}")
+            logger.error(f"[SMS CRITICAL] Unexpected error: {str(e)}")
 
     # ==========================================================
-    # PHONE NORMALIZATION (Updated for Sendchamp)
+    # PHONE NORMALIZATION
     # ==========================================================
     @staticmethod
     def _normalize_phone(phone: str) -> str:
         if not phone:
-            return phone
+            return ""
 
-        phone = "".join(filter(str.isdigit, phone.strip()))
+        # Remove everything except digits
+        clean_digits = "".join(filter(str.isdigit, phone.strip()))
 
-        # If it starts with 0 (e.g., 080...), change to 23480...
-        if phone.startswith("0") and len(phone) == 11:
-            return "234" + phone[1:]
+        # If it starts with 0 (local Nigeria), convert to 234
+        if clean_digits.startswith("0") and len(clean_digits) == 11:
+            return "234" + clean_digits[1:]
 
         # If it's already 234...
-        if phone.startswith("234") and len(phone) >= 13:
-            return phone
+        if clean_digits.startswith("234") and len(clean_digits) >= 11:
+            return clean_digits
 
-        return phone
+        # If it's short, it might be a wrong number
+        if len(clean_digits) < 10:
+            logger.warning(f"[SMS VALIDATION] Phone number {phone} seems too short.")
+
+        return clean_digits
