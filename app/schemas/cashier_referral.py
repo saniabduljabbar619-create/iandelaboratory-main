@@ -6,8 +6,8 @@ from datetime import date
 class PatientReferralEntry(BaseModel):
     full_name: str
     phone: str
-    gender: Optional[str] = None
-    dob: Optional[date] = None
+    gender: Optional[str] = "Male"
+    dob: Optional[date] = None # Matches p_entry.dob in service
     test_type_ids: List[int]
     sample_type: str = "Blood"
 

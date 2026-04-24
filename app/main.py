@@ -26,7 +26,7 @@ from app.web.routes.portal_ui import router as portal_ui_router
 from app.web.routes.admin import router as admin_router
 
 from app.services.audit_service import AuditService
-
+from app.api.routers import referrer
 
 # --------------------------------------------------
 # BASE PATH (DEPLOYMENT SAFE)
@@ -64,6 +64,7 @@ app.include_router(patients.router, prefix="/api/patients", tags=["patients"])
 app.include_router(test_requests.router, prefix="/api/test-requests", tags=["test_requests"])
 app.include_router(payments.router, prefix="/api/payments", tags=["payments"])
 app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
+app.include_router(referrer.router, prefix="/api/referrer", tags=["Referrals"])
 
 app.include_router(booking_conversion.router)
 
